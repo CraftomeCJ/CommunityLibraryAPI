@@ -1,0 +1,80 @@
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const userModel = require("../models/userModel");
+
+// Register
+async function register(req, res) {
+  const { username, password, role } = req.body;
+
+  if (!username || !password || !role) {
+    return res
+      .status(400)
+      .json({ message: "Username, password, and role are required" });
+  }
+
+  if (role !== "member" && role !== "librarian") {
+    return res
+      .status(400)
+      .json({ message: "Role must be member or librarian" });
+  }
+
+  try {
+    const existingUser = await userModel.getUserByUsername(username);
+    if (existingUser) {
+      return res.status(400).json({ message: "Username already exists" });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    await userModel.createUser(username, hashedPassword, role);
+
+    res.status(201).json({ message: "User registered successfully" });
+  } catch (error) {
+    console.error("Controller error:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+}
+
+// Login
+async function login(req, res) {
+  const { username, password } = req.body;
+
+  if (!username || !password) {
+    return res
+      .status(400)
+      .json({ message: "Username and password are required" });
+  }
+
+  try {
+    const user = await userModel.getUserByUsername(username);
+    if (!user) {
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.passwordHash);
+    if (!isMatch) {
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
+
+    const payload = {
+      id: user.user_id,
+      role: user.role,
+    };
+    const token = jwt.sign(
+      payload,
+      process.env.JWT_SECRET || "YsOuFnAc2/sf2MRGfKqmHcuia7XOkazRfXPQjdpE3HI=",
+      { expiresIn: "1h" },
+    );
+
+    res.json({ token });
+  } catch (error) {
+    console.error("Controller error:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+}
+
+module.exports = {
+  register,
+  login,
+};
