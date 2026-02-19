@@ -17,7 +17,7 @@ async function createLoan({ userId, bookId, dueDate }) {
     const bookResult = await new sql.Request(transaction)
       .input("bookId", sql.Int, bookId)
       .query(
-        "SELECT book_id, availability FROM Books WITH (UPDLOCK, ROWLOCK) WHERE book_id = @bookId"
+        "SELECT book_id, availability FROM Books WITH (UPDLOCK, ROWLOCK) WHERE book_id = @bookId",
       );
 
     const book = bookResult.recordset[0];
@@ -43,7 +43,7 @@ async function createLoan({ userId, bookId, dueDate }) {
       .input("dueDate", sql.Date, dueDate)
       .query(
         "INSERT INTO Loans (user_id, book_id, loan_date, due_date, status) " +
-          "OUTPUT INSERTED.loan_id VALUES (@userId, @bookId, GETDATE(), @dueDate, 'BORROWED')"
+          "OUTPUT INSERTED.loan_id VALUES (@userId, @bookId, GETDATE(), @dueDate, 'BORROWED')",
       );
 
     await transaction.commit();
@@ -68,7 +68,7 @@ async function getLoansForUser(userId) {
       .query(
         "SELECT l.*, b.title, b.author FROM Loans l " +
           "JOIN Books b ON b.book_id = l.book_id " +
-          "WHERE l.user_id = @userId ORDER BY l.loan_date DESC"
+          "WHERE l.user_id = @userId ORDER BY l.loan_date DESC",
       );
     return result.recordset;
   } catch (error) {
@@ -77,20 +77,55 @@ async function getLoansForUser(userId) {
   }
 }
 
-async function getAllLoans() {
-  try {
-    const pool = await poolPromise;
-    const result = await pool.request().query(
-      "SELECT l.*, b.title, b.author, u.username FROM Loans l " +
-        "JOIN Books b ON b.book_id = l.book_id " +
-        "JOIN Users u ON u.user_id = l.user_id " +
-        "ORDER BY l.loan_date DESC"
-    );
-    return result.recordset;
-  } catch (error) {
-    console.error("Database error:", error);
-    throw error;
+async function getAllLoans(options = {}) {
+  const { page = 1, limit = 10, sort = "loan_id", status } = options;
+  const offset = (page - 1) * limit;
+  const pool = await poolPromise;
+  const request = pool.request();
+  let query = `
+    SELECT l.*, b.title AS book_title, u.username AS borrower
+    FROM Loans l
+    JOIN Books b ON l.book_id = b.book_id
+    JOIN Users u ON l.user_id = u.user_id
+    WHERE 1=1`;
+
+  if (status) {
+    query += " AND l.status = @status";
+    request.input("status", status);
   }
+
+  const safeSort = ["loan_id", "loan_date", "due_date", "status"].includes(sort)
+    ? sort
+    : "loan_id";
+  query += ` ORDER BY l.${safeSort} OFFSET @offset ROWS FETCH NEXT @limit ROWS ONLY`;
+  request.input("offset", offset).input("limit", Number(limit));
+
+  const result = await request.query(query);
+  return result.recordset;
+}
+
+async function getLoanById(loanId) {
+  const pool = await poolPromise;
+  const result = await pool
+    .request()
+    .input("loanId", loanId)
+    .query(
+      `SELECT l.*, b.title AS book_title, u.username AS borrower
+       FROM Loans l
+       JOIN Books b ON l.book_id = b.book_id
+       JOIN Users u ON l.user_id = u.user_id
+       WHERE l.loan_id = @loanId`,
+    );
+  return result.recordset[0] || null;
+}
+
+async function deleteLoan(loanId) {
+  const pool = await poolPromise;
+  const result = await pool
+    .request()
+    .input("loanId", loanId)
+    .query("DELETE FROM Loans WHERE loan_id = @loanId");
+  return result.rowsAffected[0] > 0;
 }
 
 /**
@@ -108,7 +143,7 @@ async function returnLoan(loanId) {
     const loanResult = await new sql.Request(transaction)
       .input("loanId", sql.Int, loanId)
       .query(
-        "SELECT loan_id, book_id, status FROM Loans WITH (UPDLOCK, ROWLOCK) WHERE loan_id = @loanId"
+        "SELECT loan_id, book_id, status FROM Loans WITH (UPDLOCK, ROWLOCK) WHERE loan_id = @loanId",
       );
 
     const loan = loanResult.recordset[0];
@@ -125,7 +160,7 @@ async function returnLoan(loanId) {
     await new sql.Request(transaction)
       .input("loanId", sql.Int, loanId)
       .query(
-        "UPDATE Loans SET returned_date = GETDATE(), status = 'RETURNED' WHERE loan_id = @loanId"
+        "UPDATE Loans SET returned_date = GETDATE(), status = 'RETURNED' WHERE loan_id = @loanId",
       );
 
     await new sql.Request(transaction)
@@ -149,5 +184,7 @@ module.exports = {
   createLoan,
   getLoansForUser,
   getAllLoans,
+  getLoanById,
+  deleteLoan,
   returnLoan,
 };

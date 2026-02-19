@@ -1,6 +1,12 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const userModel = require("../models/userModel");
+const {
+  getAllUsers,
+  getUserById,
+  updateUserRole,
+  deleteUser,
+} = require("../models/userModel");
 
 // Register
 async function register(req, res) {
@@ -88,8 +94,50 @@ async function getAllUsersController(req, res) {
   }
 }
 
+async function getUserByIdController(req, res) {
+  try {
+    const user = await getUserById(Number(req.params.userId));
+    if (!user) return res.status(404).json({ message: "User not found" });
+    res.json(user);
+  } catch (error) {
+    console.error("Error fetching user:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+async function updateUserRoleController(req, res) {
+  const { role } = req.body;
+  if (!role || !["member", "librarian"].includes(role)) {
+    return res
+      .status(400)
+      .json({ message: "Role must be member or librarian" });
+  }
+  try {
+    const ok = await updateUserRole(Number(req.params.userId), role);
+    if (!ok) return res.status(404).json({ message: "User not found" });
+    res.json({ message: "Role updated" });
+  } catch (error) {
+    console.error("Error updating role:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+async function deleteUserController(req, res) {
+  try {
+    const ok = await deleteUser(Number(req.params.userId));
+    if (!ok) return res.status(404).json({ message: "User not found" });
+    res.json({ message: "User deleted" });
+  } catch (error) {
+    console.error("Error deleting user:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+}
+
 module.exports = {
   register,
   login,
   getAllUsersController,
+  getUserByIdController,
+  updateUserRoleController,
+  deleteUserController,
 };

@@ -3,7 +3,14 @@ const bookModel = require("../models/bookModel");
 // Get all books
 async function getAllBooks(req, res) {
   try {
-    const books = await bookModel.getAllBooks();
+    const books = await bookModel.getAllBooks({
+      page: Number(req.query.page) || 1,
+      limit: Number(req.query.limit) || 10,
+      sort: req.query.sort,
+      availability: req.query.availability,
+      title: req.query.title,
+      author: req.query.author,
+    });
     res.json(books);
   } catch (error) {
     console.error("Controller error:", error);
@@ -41,7 +48,11 @@ async function createBook(req, res) {
   }
 
   try {
-    const bookId = await bookModel.createBook({ title, author, availability: avail });
+    const bookId = await bookModel.createBook({
+      title,
+      author,
+      availability: avail,
+    });
     res.status(201).json({ message: "Book created", bookId });
   } catch (error) {
     console.error("Controller error:", error);
@@ -107,7 +118,10 @@ async function updateBookAvailability(req, res) {
   }
 
   try {
-    const updated = await bookModel.updateBookAvailability(Number(bookId), availability);
+    const updated = await bookModel.updateBookAvailability(
+      Number(bookId),
+      availability,
+    );
     if (!updated) {
       return res.status(404).json({ message: "Book not found" });
     }

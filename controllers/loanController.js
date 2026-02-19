@@ -5,13 +5,12 @@ async function createLoan(req, res) {
   const { bookId, userId, dueDate } = req.body;
 
   if (!bookId || !dueDate) {
-    return res
-      .status(400)
-      .json({ message: "bookId and dueDate are required" });
+    return res.status(400).json({ message: "bookId and dueDate are required" });
   }
 
   // Members can only create loans for themselves
-  const effectiveUserId = req.user.role === "librarian" && userId ? userId : req.user.id;
+  const effectiveUserId =
+    req.user.role === "librarian" && userId ? userId : req.user.id;
   if (req.user.role !== "librarian" && userId && userId !== req.user.id) {
     return res.status(403).json({ message: "Forbidden" });
   }
@@ -44,12 +43,42 @@ async function createLoan(req, res) {
 async function getLoans(req, res) {
   try {
     if (req.user.role === "librarian") {
-      const loans = await loanModel.getAllLoans();
+      const loans = await loanModel.getAllLoans({
+        page: Number(req.query.page) || 1,
+        limit: Number(req.query.limit) || 10,
+        sort: req.query.sort,
+        status: req.query.status,
+      });
       return res.json(loans);
     }
 
     const loans = await loanModel.getLoansForUser(req.user.id);
     res.json(loans);
+  } catch (error) {
+    console.error("Controller error:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+}
+
+async function getLoanById(req, res) {
+  try {
+    const loan = await loanModel.getLoanById(Number(req.params.loanId));
+    if (!loan) return res.status(404).json({ message: "Loan not found" });
+    if (req.user.role !== "librarian" && loan.user_id !== req.user.id) {
+      return res.status(403).json({ message: "Forbidden" });
+    }
+    res.json(loan);
+  } catch (error) {
+    console.error("Controller error:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+}
+
+async function deleteLoan(req, res) {
+  try {
+    const ok = await loanModel.deleteLoan(Number(req.params.loanId));
+    if (!ok) return res.status(404).json({ message: "Loan not found" });
+    res.json({ message: "Loan deleted" });
   } catch (error) {
     console.error("Controller error:", error);
     res.status(500).json({ message: "Internal server error" });
@@ -82,5 +111,7 @@ async function returnLoan(req, res) {
 module.exports = {
   createLoan,
   getLoans,
+  getLoanById,
+  deleteLoan,
   returnLoan,
 };

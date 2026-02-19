@@ -57,8 +57,39 @@ async function getAllUsers(filters = {}) {
   }
 }
 
+async function getUserById(userId) {
+  const pool = await poolPromise;
+  const result = await pool
+    .request()
+    .input("userId", userId)
+    .query("SELECT user_id, username, role FROM Users WHERE user_id = @userId");
+  return result.recordset[0] || null;
+}
+
+async function updateUserRole(userId, role) {
+  const pool = await poolPromise;
+  const result = await pool
+    .request()
+    .input("userId", userId)
+    .input("role", role)
+    .query("UPDATE Users SET role = @role WHERE user_id = @userId");
+  return result.rowsAffected[0] > 0;
+}
+
+async function deleteUser(userId) {
+  const pool = await poolPromise;
+  const result = await pool
+    .request()
+    .input("userId", userId)
+    .query("DELETE FROM Users WHERE user_id = @userId");
+  return result.rowsAffected[0] > 0;
+}
+
 module.exports = {
   getUserByUsername,
   createUser,
   getAllUsers,
+  getUserById,
+  updateUserRole,
+  deleteUser,
 };

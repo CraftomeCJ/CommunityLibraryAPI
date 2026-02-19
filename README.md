@@ -28,37 +28,43 @@ The server will run on port 3000.
 
 ### Authentication
 
-- `POST /auth/register` - Register a new user (body: {username, password, role})
-- `POST /auth/login` - Login (body: {username, password}) - Returns JWT token
-- **GET /auth/users**  
-  Retrieve a list of all users (librarian only).
-  - Query Params: `role` (e.g., `?role=member`), `username` (partial match, e.g., `?username=test`).
-  - Headers: `Authorization: Bearer <token>`
-  - Response: 200 OK with user list (e.g., `[{"user_id": 1, "username": "member1", "role": "member"}]`).
-  - Errors: 401 (unauthorized), 403 (not librarian), 500 (server error).
+- Member/Librarian:
+  - `POST /auth/register` - Register a new user (body: {username, password, role})
+  - `POST /auth/login` - Login (body: {username, password}) - Returns JWT token
+- Librarian:
+  - `GET /auth/users` - Retrieve a list of all users - optional filters: role, username
+    - Query Params: `role` (e.g., `?role=member`), `username` (partial match, e.g., `?username=test`).
+    - Headers: `Authorization: Bearer <token>`
+    - Response: 200 OK with user list (e.g., `[{"user_id": 1, "username": "member1", "role": "member"}]`).
+    - Errors: 401 (unauthorized), 403 (not librarian), 500 (server error).
+  - `GET /auth/users/:userId`
+  - `PUT /auth/users/:userId/role` (body: { role })
+  - `DELETE /auth/users/:userId`
 
 ### Books
 
 All require JWT.
 
 - Member/Librarian:
-  - `GET /books` - list books
+  - `GET /books` - list books and supports ?page&limit&sort=title|author|book_id&availability=Y|N&title=...&author=...
   - `GET /books/:bookId` - get single book
 - Librarian only:
   - `POST /books` - create book
   - `PUT /books/:bookId` - update book
   - `DELETE /books/:bookId` - delete book
-  - `PUT /books/:bookId/availability` - update availability (kept from Practical07)
+  - `PUT /books/:bookId/availability` - update availability
 
 ### Loans
 
 All require JWT.
 
 - Member/Librarian:
-  - `POST /loans` - borrow a book (member borrows for self)
-  - `GET /loans` - list loans (member sees own; librarian sees all)
+  - `POST /loans` - borrow a book (member borrows for self) or librarian (can specify userId)
+  - `GET /loans` - list loans (member sees own; librarian sees all) and supports ?page&limit&sort=loan_id|loan_date|due_date|status&status=...
+  - `GET /loans/:loanId` — member if own; librarian any
 - Librarian only:
   - `PUT /loans/:loanId/return` - return a loan (also sets book availability back to 'Y')
+  - `DELETE /loans/:loanId`
 
 ## Sample Users (from create_tables.sql)
 

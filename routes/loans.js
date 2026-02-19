@@ -9,7 +9,7 @@ router.post(
   "/",
   verifyJWT,
   authorize(["member", "librarian"]),
-  loanController.createLoan
+  loanController.createLoan,
 );
 
 // List loans - member sees own, librarian sees all
@@ -17,7 +17,14 @@ router.get(
   "/",
   verifyJWT,
   authorize(["member", "librarian"]),
-  loanController.getLoans
+  loanController.getLoans,
+);
+
+router.get(
+  "/:loanId",
+  verifyJWT,
+  authorize(["member", "librarian"]),
+  loanController.getLoanById,
 );
 
 // Return a loan - librarian only
@@ -25,7 +32,14 @@ router.put(
   "/:loanId/return",
   verifyJWT,
   authorize(["librarian"]),
-  loanController.returnLoan
+  loanController.returnLoan,
+);
+
+router.delete(
+  "/:loanId",
+  verifyJWT,
+  authorize(["librarian"]),
+  loanController.deleteLoan,
 );
 
 module.exports = router;
