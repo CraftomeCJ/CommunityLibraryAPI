@@ -74,7 +74,22 @@ async function login(req, res) {
   }
 }
 
+async function getAllUsersController(req, res) {
+  try {
+    const filters = {
+      role: req.query.role,
+      username: req.query.username,
+    };
+    const users = await userModel.getAllUsers(filters);
+    res.status(200).json(users);
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+}
+
 module.exports = {
   register,
   login,
+  getAllUsersController,
 };

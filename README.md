@@ -12,6 +12,7 @@ Checkpoint 2 scope: **Auth (JWT + RBAC) + Books CRUD + Loans (borrow/list/return
    - Copy `.env.example` to `.env` and fill in your SQL Server password and JWT secret.
 
 3. **Install Dependencies:**
+
    ```bash
    npm install
    ```
@@ -23,14 +24,23 @@ Checkpoint 2 scope: **Auth (JWT + RBAC) + Books CRUD + Loans (borrow/list/return
 
 The server will run on port 3000.
 
-## API Endpoints (Checkpoint 2)
+## API Endpoints
 
 ### Authentication
+
 - `POST /auth/register` - Register a new user (body: {username, password, role})
 - `POST /auth/login` - Login (body: {username, password}) - Returns JWT token
+- **GET /auth/users**  
+  Retrieve a list of all users (librarian only).
+  - Query Params: `role` (e.g., `?role=member`), `username` (partial match, e.g., `?username=test`).
+  - Headers: `Authorization: Bearer <token>`
+  - Response: 200 OK with user list (e.g., `[{"user_id": 1, "username": "member1", "role": "member"}]`).
+  - Errors: 401 (unauthorized), 403 (not librarian), 500 (server error).
 
 ### Books
+
 All require JWT.
+
 - Member/Librarian:
   - `GET /books` - list books
   - `GET /books/:bookId` - get single book
@@ -41,7 +51,9 @@ All require JWT.
   - `PUT /books/:bookId/availability` - update availability (kept from Practical07)
 
 ### Loans
+
 All require JWT.
+
 - Member/Librarian:
   - `POST /loans` - borrow a book (member borrows for self)
   - `GET /loans` - list loans (member sees own; librarian sees all)
@@ -49,10 +61,12 @@ All require JWT.
   - `PUT /loans/:loanId/return` - return a loan (also sets book availability back to 'Y')
 
 ## Sample Users (from create_tables.sql)
+
 - librarian1 / P@ssw0rd123
 - member1 / P@ssw0rd123
 
 ## Technologies Used
+
 - Node.js
 - Express
 - MSSQL

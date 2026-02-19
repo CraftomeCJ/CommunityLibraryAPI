@@ -97,7 +97,7 @@ async function deleteBook(req, res) {
   }
 }
 
-// Update book availability (librarian) - kept for backward compatibility with your Practical07
+// Update book availability (librarian)
 async function updateBookAvailability(req, res) {
   const { bookId } = req.params;
   const { availability } = req.body;

@@ -15,7 +15,7 @@ app.use("/auth", authRoutes);
 app.use("/books", bookRoutes);
 app.use("/loans", loanRoutes);
 
-// Basic health check (useful for demo)
+// Basic health check
 app.get("/health", (req, res) => res.json({ status: "ok" }));
 
 module.exports = app;
