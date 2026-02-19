@@ -13,7 +13,7 @@ const verifyJWT = (req, res, next) => {
 
   jwt.verify(
     token,
-    process.env.JWT_SECRET || "4NxxVq1M8BBzoba3hycMouLm8GhZblrF35x+FlOTWik=",
+    process.env.JWT_SECRET || "YsOuFnAc2/sf2MRGfKqmHcuia7XOkazRfXPQjdpE3HI=",
     (err, decoded) => {
       if (err) {
         return res.status(403).json({ message: "Invalid token" });

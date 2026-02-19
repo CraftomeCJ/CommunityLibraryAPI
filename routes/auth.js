@@ -2,7 +2,7 @@ const express = require("express");
 const authController = require("../controllers/authController");
 const router = express.Router();
 const { getAllUsersController } = require("../controllers/authController");
-const { verifyJWT } = require("../middlewares/auth");
+const { verifyJWT, authorize } = require("../middlewares/auth");
 
 // Register endpoint
 router.post("/register", authController.register);
