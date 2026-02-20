@@ -1,9 +1,24 @@
 require("dotenv").config();
 const express = require("express");
+const morgan = require("morgan");
+const winston = require("winston");
 
 const app = express();
+const logger = winston.createLogger({
+  level: "info",
+  format: winston.format.json(),
+  transports: [
+    new winston.transports.File({ filename: "error.log", level: "error" }),
+    new winston.transports.File({ filename: "combined.log" }),
+  ],
+});
 
 // Middleware
+app.use(
+  morgan("combined", {
+    stream: { write: (message) => logger.info(message.trim()) },
+  }),
+);
 app.use(express.json());
 
 // Routes
@@ -17,5 +32,11 @@ app.use("/loans", loanRoutes);
 
 // Basic health check
 app.get("/health", (req, res) => res.json({ status: "ok" }));
+
+// global error handler
+app.use((err, req, res, _next) => {
+  logger.error(err.message);
+  res.status(500).json({ error: "Something went wrong" });
+});
 
 module.exports = app;
