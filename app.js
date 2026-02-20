@@ -7,17 +7,32 @@ const externalRoutes = require("./routes/external");
 const app = express();
 const logger = winston.createLogger({
   level: "info",
-  format: winston.format.json(),
+  format: format.combine(
+    format.timestamp(), // add timestamp
+    format.json(),
+  ),
   transports: [
     new winston.transports.File({ filename: "error.log", level: "error" }),
     new winston.transports.File({ filename: "combined.log" }),
   ],
 });
 
+// Audit trail: log user, role, method, path
+app.use((req, _res, next) => {
+  logger.info({
+    msg: "request",
+    method: req.method,
+    path: req.originalUrl,
+    userId: req.user?.id || null,
+    role: req.user?.role || null,
+  });
+  next();
+});
+
 // Middleware
 app.use(
   morgan("combined", {
-    stream: { write: (message) => logger.info(message.trim()) },
+    stream: { write: (message) => logger.info({ msg: message.trim() }) },
   }),
 );
 app.use(express.json());
@@ -37,7 +52,7 @@ app.get("/health", (req, res) => res.json({ status: "ok" }));
 
 // global error handler
 app.use((err, req, res, _next) => {
-  logger.error(err.message);
+  logger.error({ msg: err.message });
   res.status(500).json({ error: "Something went wrong" });
 });
 
