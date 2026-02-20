@@ -2,6 +2,7 @@ require("dotenv").config();
 const express = require("express");
 const morgan = require("morgan");
 const winston = require("winston");
+const { format } = winston;
 const externalRoutes = require("./routes/external");
 
 const app = express();
