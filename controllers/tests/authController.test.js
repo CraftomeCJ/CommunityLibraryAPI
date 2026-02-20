@@ -1,6 +1,5 @@
 const request = require("supertest");
-const express = require("express");
-const authController = require("../authController");
+const app = require("../../app");
 const userModel = require("../../models/userModel");
 
 // Mock dependencies
@@ -11,6 +10,13 @@ jest.mock("bcryptjs", () => ({
 }));
 process.env.JWT_SECRET = "testsecret";
 jest.mock("../../models/userModel");
+jest.mock("../../middlewares/auth", () => ({
+  verifyJWT: (req, res, next) => {
+    req.user = { id: 1, role: "librarian" }; // Mock user
+    next();
+  },
+  authorize: () => (req, res, next) => next(),
+}));
 jest.mock("../../dbConfig", () => ({
   poolPromise: Promise.resolve({
     request: jest.fn(() => ({
@@ -20,12 +26,6 @@ jest.mock("../../dbConfig", () => ({
   }),
 }));
 
-const app = express();
-app.use(express.json());
-app.post("/register", authController.register);
-app.post("/login", authController.login);
-app.get("/users", authController.getAllUsersController);
-
 describe("Auth Controller", () => {
   describe("register", () => {
     it("should register a new user successfully", async () => {
@@ -33,7 +33,7 @@ describe("Auth Controller", () => {
       userModel.createUser.mockResolvedValue();
 
       const res = await request(app)
-        .post("/register")
+        .post("/auth/register")
         .send({ username: "testuser", password: "pass123", role: "member" });
 
       expect(res.status).toBe(201);
@@ -44,7 +44,7 @@ describe("Auth Controller", () => {
       userModel.getUserByUsername.mockResolvedValue({ username: "testuser" });
 
       const res = await request(app)
-        .post("/register")
+        .post("/auth/register")
         .send({ username: "testuser", password: "pass123", role: "member" });
 
       expect(res.status).toBe(400);
@@ -53,8 +53,8 @@ describe("Auth Controller", () => {
 
     it("should return 400 for invalid role", async () => {
       const res = await request(app)
-        .post("/register")
-        .send({ username: "testuser", password: "pass123", role: "invalid" });
+        .post("/auth/register")
+        .send({ username: "testuser2", password: "pass123", role: "invalid" });
 
       expect(res.status).toBe(400);
       expect(res.body.message).toBe("Role must be member or librarian");
@@ -70,7 +70,7 @@ describe("Auth Controller", () => {
       });
 
       const res = await request(app)
-        .post("/login")
+        .post("/auth/login")
         .send({ username: "testuser", password: "pass123" });
 
       expect(res.status).toBe(200);
@@ -81,7 +81,7 @@ describe("Auth Controller", () => {
       userModel.getUserByUsername.mockResolvedValue(null);
 
       const res = await request(app)
-        .post("/login")
+        .post("/auth/login")
         .send({ username: "invalid", password: "wrong" });
 
       expect(res.status).toBe(401);
@@ -95,7 +95,7 @@ describe("Auth Controller", () => {
         { user_id: 1, username: "user1", role: "member" },
       ]);
 
-      const res = await request(app).get("/users");
+      const res = await request(app).get("/auth/users");
 
       expect(res.status).toBe(200);
       expect(res.body).toEqual([
@@ -106,7 +106,7 @@ describe("Auth Controller", () => {
     it("should handle errors", async () => {
       userModel.getAllUsers.mockRejectedValue(new Error("DB error"));
 
-      const res = await request(app).get("/users");
+      const res = await request(app).get("/auth/users");
 
       expect(res.status).toBe(500);
       expect(res.body.error).toBe("Internal server error");
