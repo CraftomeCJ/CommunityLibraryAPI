@@ -4,6 +4,8 @@ const morgan = require("morgan");
 const winston = require("winston");
 const { format } = winston;
 const externalRoutes = require("./routes/external");
+const swaggerUi = require("swagger-ui-express");
+const swaggerSpec = require("./swagger");
 
 const app = express();
 const logger = winston.createLogger({
@@ -57,5 +59,8 @@ app.use((err, req, res, _next) => {
   logger.error({ msg: err.message });
   res.status(500).json({ error: "Something went wrong" });
 });
+
+app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.get("/openapi.json", (_req, res) => res.json(swaggerSpec));
 
 module.exports = app;
