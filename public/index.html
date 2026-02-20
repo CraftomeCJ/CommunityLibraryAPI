@@ -96,10 +96,8 @@
       <legend>Auth</legend>
       <div class="row">
         <div class="col">
-          <div>Username <input id="username" value="librarian1" /></div>
-          <div>
-            Password <input id="password" type="password" value="P@ssw0rd123" />
-          </div>
+          <div>Username <input id="username" value="" /></div>
+          <div>Password <input id="password" type="password" value="" /></div>
           <button onclick="login()">Login</button>
         </div>
         <div class="col">
@@ -199,10 +197,22 @@
     <script>
       const base = "";
 
-      const authHeaders = () => {
+      function authHeaders() {
         const t = document.getElementById("token").value.trim();
-        return t ? { Authorization: "Bearer " + t } : {};
-      };
+        if (!t) {
+          alert("401: No token provided. Please login.");
+          throw new Error("No token");
+        }
+        return { Authorization: "Bearer " + t };
+      }
+
+      async function fetchWithAuth(url, options = {}) {
+        const headers = { ...(options.headers || {}), ...authHeaders() };
+        const res = await fetch(url, { ...options, headers });
+        if (res.status === 401)
+          alert("401: Unauthorized or token expired. Please login again.");
+        return res;
+      }
 
       async function registerUser() {
         const res = await fetch(`${base}/auth/register`, {
@@ -241,7 +251,7 @@
           page: document.getElementById("bPage").value,
           limit: document.getElementById("bLimit").value,
         });
-        const res = await fetch(`${base}/books?` + params.toString(), {
+        const res = await fetchWithAuth(`${base}/books?` + params.toString(), {
           headers: authHeaders(),
         });
         document.getElementById("booksOut").textContent = JSON.stringify(
@@ -252,7 +262,7 @@
       }
 
       async function borrow() {
-        const res = await fetch(`${base}/loans`, {
+        const res = await fetchWithAuth(`${base}/loans`, {
           method: "POST",
           headers: { "Content-Type": "application/json", ...authHeaders() },
           body: JSON.stringify({
@@ -275,7 +285,7 @@
           page: document.getElementById("lPage").value,
           limit: document.getElementById("lLimit").value,
         });
-        const res = await fetch(`${base}/loans?` + params.toString(), {
+        const res = await fetchWithAuth(`${base}/loans?` + params.toString(), {
           headers: authHeaders(),
         });
         document.getElementById("loansOut").textContent = JSON.stringify(
@@ -287,7 +297,7 @@
 
       async function returnLoan() {
         const id = document.getElementById("returnLoanId").value;
-        const res = await fetch(`${base}/loans/${id}/return`, {
+        const res = await fetchWithAuth(`${base}/loans/${id}/return`, {
           method: "PUT",
           headers: authHeaders(),
         });
@@ -301,7 +311,7 @@
 
       async function deleteLoan() {
         const id = document.getElementById("deleteLoanId").value;
-        const res = await fetch(`${base}/loans/${id}`, {
+        const res = await fetchWithAuth(`${base}/loans/${id}`, {
           method: "DELETE",
           headers: authHeaders(),
         });
@@ -319,9 +329,9 @@
           author: document.getElementById("olAuthor").value,
           isbn: document.getElementById("olIsbn").value,
         });
-        const res = await fetch(`${base}/external/books?` + params.toString(), {
-          headers: authHeaders(),
-        });
+        const res = await fetchWithAuth(
+          `${base}/external/books?` + params.toString(),
+        );
         const data = await res.json();
         document.getElementById("externalOut").textContent = JSON.stringify(
           data,

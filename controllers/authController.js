@@ -65,12 +65,13 @@ async function login(req, res) {
 
     const payload = {
       id: user.user_id,
+      username: user.username,
       role: user.role,
     };
     const token = jwt.sign(
       payload,
       process.env.JWT_SECRET || "YsOuFnAc2/sf2MRGfKqmHcuia7XOkazRfXPQjdpE3HI=",
-      { expiresIn: "1h" },
+      { expiresIn: "5m" },
     );
 
     res.json({ token });
