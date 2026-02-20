@@ -7,6 +7,12 @@ async function createLoan(req, res) {
   if (!bookId || !dueDate) {
     return res.status(400).json({ message: "bookId and dueDate are required" });
   }
+  if (Number.isNaN(Number(bookId))) {
+    return res.status(400).json({ message: "bookId must be a number" });
+  }
+  if (userId !== undefined && Number.isNaN(Number(userId))) {
+    return res.status(400).json({ message: "userId must be a number" });
+  }
 
   // Members can only create loans for themselves
   const effectiveUserId =
@@ -61,6 +67,10 @@ async function getLoans(req, res) {
 }
 
 async function getLoanById(req, res) {
+  if (Number.isNaN(Number(req.params.loanId))) {
+    return res.status(400).json({ message: "loanId must be a number" });
+  }
+
   try {
     const loan = await loanModel.getLoanById(Number(req.params.loanId));
     if (!loan) return res.status(404).json({ message: "Loan not found" });
@@ -75,6 +85,10 @@ async function getLoanById(req, res) {
 }
 
 async function deleteLoan(req, res) {
+  if (Number.isNaN(Number(req.params.loanId))) {
+    return res.status(400).json({ message: "loanId must be a number" });
+  }
+
   try {
     const ok = await loanModel.deleteLoan(Number(req.params.loanId));
     if (!ok) return res.status(404).json({ message: "Loan not found" });
@@ -87,7 +101,12 @@ async function deleteLoan(req, res) {
 
 // Return a loan (librarian only)
 async function returnLoan(req, res) {
+  if (Number.isNaN(Number(req.params.loanId))) {
+    return res.status(400).json({ message: "loanId must be a number" });
+  }
+
   const { loanId } = req.params;
+
   try {
     const result = await loanModel.returnLoan(Number(loanId));
 

@@ -12,10 +12,15 @@ const {
 async function register(req, res) {
   const { username, password, role } = req.body;
 
-  if (!username || !password || !role) {
-    return res
-      .status(400)
-      .json({ message: "Username, password, and role are required" });
+  if (
+    !username ||
+    !password ||
+    !role ||
+    !["member", "librarian"].includes(role)
+  ) {
+    return res.status(400).json({
+      message: "username, password, role (member|librarian) required",
+    });
   }
 
   if (role !== "member" && role !== "librarian") {
@@ -47,9 +52,7 @@ async function login(req, res) {
   const { username, password } = req.body;
 
   if (!username || !password) {
-    return res
-      .status(400)
-      .json({ message: "Username and password are required" });
+    return res.status(400).json({ message: "username and password required" });
   }
 
   try {
