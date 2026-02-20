@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Community Library</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        margin: 1rem;
+      }
+      fieldset {
+        margin-bottom: 1rem;
+      }
+      input,
+      select,
+      button {
+        margin: 0.25rem 0;
+        padding: 0.35rem;
+      }
+      pre {
+        background: #f5f5f5;
+        padding: 0.75rem;
+        max-height: 320px;
+        overflow: auto;
+      }
+      .row {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+      }
+      .col {
+        flex: 1 1 320px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Community Library</h1>
+
+    <fieldset>
+      <legend>Register</legend>
+      <div class="row">
+        <div class="col">
+          <div>
+            Username <input id="regUsername" placeholder="new username" />
+          </div>
+          <div>
+            Password
+            <input id="regPassword" type="password" placeholder="password" />
+          </div>
+          <div>
+            Role
+            <select id="regRole">
+              <option value="member">member</option>
+              <option value="librarian">librarian</option>
+            </select>
+          </div>
+          <button onclick="registerUser()">Register</button>
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Auth</legend>
+      <div class="row">
+        <div class="col">
+          <div>Username <input id="username" value="librarian1" /></div>
+          <div>
+            Password <input id="password" type="password" value="P@ssw0rd123" />
+          </div>
+          <button onclick="login()">Login</button>
+        </div>
+        <div class="col">
+          <div>JWT Token</div>
+          <textarea id="token" rows="3" style="width: 100%"></textarea>
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Books (local)</legend>
+      <div class="row">
+        <div class="col">
+          <div>Title <input id="bTitle" placeholder="title filter" /></div>
+          <div>Author <input id="bAuthor" placeholder="author filter" /></div>
+          <div>
+            Availability
+            <select id="bAvail">
+              <option value="">(any)</option>
+              <option value="Y">Y</option>
+              <option value="N">N</option>
+            </select>
+          </div>
+          <div>
+            Sort
+            <select id="bSort">
+              <option value="book_id">book_id</option>
+              <option value="title">title</option>
+              <option value="author">author</option>
+              <option value="availability">availability</option>
+            </select>
+            Page
+            <input id="bPage" type="number" value="1" style="width: 60px" />
+            Limit
+            <input id="bLimit" type="number" value="5" style="width: 60px" />
+          </div>
+          <button onclick="loadBooks()">Load Books</button>
+        </div>
+        <div class="col">
+          <div>Borrow: Book ID <input id="borrowBookId" type="number" /></div>
+          <div>Due Date <input id="borrowDue" type="date" /></div>
+          <button onclick="borrow()">Borrow</button>
+        </div>
+      </div>
+      <pre id="booksOut"></pre>
+    </fieldset>
+
+    <fieldset>
+      <legend>Loans (local)</legend>
+      <div class="row">
+        <div class="col">
+          <div>
+            Status
+            <select id="lStatus">
+              <option value="">(any)</option>
+              <option value="ON_LOAN">ON_LOAN</option>
+              <option value="RETURNED">RETURNED</option>
+            </select>
+            Sort
+            <select id="lSort">
+              <option value="loan_id">loan_id</option>
+              <option value="loan_date">loan_date</option>
+              <option value="due_date">due_date</option>
+              <option value="status">status</option>
+            </select>
+            Page
+            <input id="lPage" type="number" value="1" style="width: 60px" />
+            Limit
+            <input id="lLimit" type="number" value="5" style="width: 60px" />
+          </div>
+          <button onclick="loadLoans()">Load Loans</button>
+        </div>
+        <div class="col">
+          <div>Return: Loan ID <input id="returnLoanId" type="number" /></div>
+          <button onclick="returnLoan()">Return Loan</button>
+          <div>Delete: Loan ID <input id="deleteLoanId" type="number" /></div>
+          <button onclick="deleteLoan()">Delete Loan (librarian)</button>
+        </div>
+      </div>
+      <pre id="loansOut"></pre>
+    </fieldset>
+
+    <fieldset>
+      <legend>External (Open Library)</legend>
+      <div class="row">
+        <div class="col">
+          <div>Title <input id="olTitle" placeholder="title" /></div>
+          <div>Author <input id="olAuthor" placeholder="author" /></div>
+          <div>ISBN <input id="olIsbn" placeholder="isbn" /></div>
+          <button onclick="searchExternal()">Search Open Library</button>
+        </div>
+      </div>
+      <div id="externalCards" class="row"></div>
+      <pre id="externalOut"></pre>
+    </fieldset>
+
+    <script>
+      const base = "";
+
+      const authHeaders = () => {
+        const t = document.getElementById("token").value.trim();
+        return t ? { Authorization: "Bearer " + t } : {};
+      };
+
+      async function registerUser() {
+        const res = await fetch(`${base}/auth/register`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            username: document.getElementById("regUsername").value,
+            password: document.getElementById("regPassword").value,
+            role: document.getElementById("regRole").value,
+          }),
+        });
+        const data = await res.json();
+        alert(res.status === 201 ? "Registered" : data.message || "Failed");
+      }
+
+      async function login() {
+        const res = await fetch(`${base}/auth/login`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            username: document.getElementById("username").value,
+            password: document.getElementById("password").value,
+          }),
+        });
+        const data = await res.json();
+        if (data.token) document.getElementById("token").value = data.token;
+        alert(res.status === 200 ? "Login OK" : "Login failed");
+      }
+
+      async function loadBooks() {
+        const params = new URLSearchParams({
+          title: document.getElementById("bTitle").value,
+          author: document.getElementById("bAuthor").value,
+          availability: document.getElementById("bAvail").value,
+          sort: document.getElementById("bSort").value,
+          page: document.getElementById("bPage").value,
+          limit: document.getElementById("bLimit").value,
+        });
+        const res = await fetch(`${base}/books?` + params.toString(), {
+          headers: authHeaders(),
+        });
+        document.getElementById("booksOut").textContent = JSON.stringify(
+          await res.json(),
+          null,
+          2,
+        );
+      }
+
+      async function borrow() {
+        const res = await fetch(`${base}/loans`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", ...authHeaders() },
+          body: JSON.stringify({
+            bookId: Number(document.getElementById("borrowBookId").value),
+            dueDate: document.getElementById("borrowDue").value,
+          }),
+        });
+        alert(res.status === 201 ? "Borrowed" : "Failed");
+        document.getElementById("booksOut").textContent = JSON.stringify(
+          await res.json(),
+          null,
+          2,
+        );
+      }
+
+      async function loadLoans() {
+        const params = new URLSearchParams({
+          status: document.getElementById("lStatus").value,
+          sort: document.getElementById("lSort").value,
+          page: document.getElementById("lPage").value,
+          limit: document.getElementById("lLimit").value,
+        });
+        const res = await fetch(`${base}/loans?` + params.toString(), {
+          headers: authHeaders(),
+        });
+        document.getElementById("loansOut").textContent = JSON.stringify(
+          await res.json(),
+          null,
+          2,
+        );
+      }
+
+      async function returnLoan() {
+        const id = document.getElementById("returnLoanId").value;
+        const res = await fetch(`${base}/loans/${id}/return`, {
+          method: "PUT",
+          headers: authHeaders(),
+        });
+        alert(res.status === 200 ? "Returned" : "Failed");
+        document.getElementById("loansOut").textContent = JSON.stringify(
+          await res.json(),
+          null,
+          2,
+        );
+      }
+
+      async function deleteLoan() {
+        const id = document.getElementById("deleteLoanId").value;
+        const res = await fetch(`${base}/loans/${id}`, {
+          method: "DELETE",
+          headers: authHeaders(),
+        });
+        alert(res.status === 200 ? "Deleted" : "Failed");
+        document.getElementById("loansOut").textContent = JSON.stringify(
+          await res.json(),
+          null,
+          2,
+        );
+      }
+
+      async function searchExternal() {
+        const params = new URLSearchParams({
+          title: document.getElementById("olTitle").value,
+          author: document.getElementById("olAuthor").value,
+          isbn: document.getElementById("olIsbn").value,
+        });
+        const res = await fetch(`${base}/external/books?` + params.toString(), {
+          headers: authHeaders(),
+        });
+        const data = await res.json();
+        document.getElementById("externalOut").textContent = JSON.stringify(
+          data,
+          null,
+          2,
+        );
+
+        const wrap = document.getElementById("externalCards");
+        wrap.innerHTML = "";
+        (Array.isArray(data) ? data : []).forEach((b) => {
+          const cover = b.cover_i
+            ? `https://covers.openlibrary.org/b/id/${b.cover_i}-M.jpg`
+            : "";
+          const div = document.createElement("div");
+          div.style.border = "1px solid #ddd";
+          div.style.padding = "0.5rem";
+          div.style.margin = "0.25rem";
+          div.style.width = "200px";
+          div.innerHTML = `
+            ${cover ? `<img src="${cover}" alt="cover" style="width:100%;height:240px;object-fit:cover;">` : ""}
+            <div><strong>${b.title || "No title"}</strong></div>
+            <div>${(b.author_name || []).join(", ") || "Unknown author"}</div>
+            <div>${b.first_publish_year || ""}</div>
+          `;
+          wrap.appendChild(div);
+        });
+      }
+    </script>
+  </body>
+</html>

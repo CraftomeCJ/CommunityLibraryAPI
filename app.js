@@ -37,6 +37,7 @@ app.use(
   }),
 );
 app.use(express.json());
+app.use(express.static("public"));
 
 // Routes
 const authRoutes = require("./routes/auth");
