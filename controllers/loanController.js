@@ -4,16 +4,6 @@ const loanModel = require("../models/loanModel");
 async function createLoan(req, res) {
   const { bookId, userId, dueDate } = req.body;
 
-  if (!bookId || !dueDate) {
-    return res.status(400).json({ message: "bookId and dueDate are required" });
-  }
-  if (Number.isNaN(Number(bookId))) {
-    return res.status(400).json({ message: "bookId must be a number" });
-  }
-  if (userId !== undefined && Number.isNaN(Number(userId))) {
-    return res.status(400).json({ message: "userId must be a number" });
-  }
-
   // Members can only create loans for themselves
   const effectiveUserId =
     req.user.role === "librarian" && userId ? userId : req.user.id;

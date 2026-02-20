@@ -1,6 +1,8 @@
 const express = require("express");
 const { verifyJWT, authorize } = require("../middlewares/auth");
 const loanController = require("../controllers/loanController");
+const { validate, validateParams } = require("../middlewares/validation");
+const { createLoanSchema, loanIdParamSchema } = require("../validators/loanValidators");
 
 const router = express.Router();
 
@@ -57,6 +59,7 @@ router.post(
   "/",
   verifyJWT,
   authorize(["member", "librarian"]),
+  validate(createLoanSchema),
   loanController.createLoan,
 );
 router.get(
@@ -99,6 +102,7 @@ router.get(
   "/:loanId",
   verifyJWT,
   authorize(["member", "librarian"]),
+  validateParams(loanIdParamSchema),
   loanController.getLoanById,
 );
 
@@ -106,6 +110,7 @@ router.delete(
   "/:loanId",
   verifyJWT,
   authorize(["librarian"]),
+  validateParams(loanIdParamSchema),
   loanController.deleteLoan,
 );
 
@@ -129,6 +134,7 @@ router.put(
   "/:loanId/return",
   verifyJWT,
   authorize(["librarian"]),
+  validateParams(loanIdParamSchema),
   loanController.returnLoan,
 );
 

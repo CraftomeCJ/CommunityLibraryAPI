@@ -3,6 +3,13 @@ const authController = require("../controllers/authController");
 const router = express.Router();
 const { getAllUsersController } = require("../controllers/authController");
 const { verifyJWT, authorize } = require("../middlewares/auth");
+const { validate, validateParams } = require("../middlewares/validation");
+const {
+  registerSchema,
+  loginSchema,
+  updateUserRoleSchema,
+  userIdParamSchema
+} = require("../validators/authValidators");
 
 /**
  * @swagger
@@ -34,7 +41,7 @@ const { verifyJWT, authorize } = require("../middlewares/auth");
  *       400:
  *         description: Invalid input
  */
-router.post("/register", authController.register);
+router.post("/register", validate(registerSchema), authController.register);
 
 /**
  * @swagger
@@ -58,7 +65,7 @@ router.post("/register", authController.register);
  *       401:
  *         description: Invalid credentials
  */
-router.post("/login", authController.login);
+router.post("/login", validate(loginSchema), authController.login);
 
 /**
  * @swagger
@@ -132,18 +139,22 @@ router.get(
   "/users/:userId",
   verifyJWT,
   authorize(["librarian"]),
+  validateParams(userIdParamSchema),
   authController.getUserByIdController,
 );
 router.put(
   "/users/:userId/role",
   verifyJWT,
   authorize(["librarian"]),
+  validateParams(userIdParamSchema),
+  validate(updateUserRoleSchema),
   authController.updateUserRoleController,
 );
 router.delete(
   "/users/:userId",
   verifyJWT,
   authorize(["librarian"]),
+  validateParams(userIdParamSchema),
   authController.deleteUserController,
 );
 

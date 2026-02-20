@@ -1,5 +1,12 @@
 const express = require("express");
 const { verifyJWT, authorize } = require("../middlewares/auth");
+const { validate, validateParams } = require("../middlewares/validation");
+const {
+  createBookSchema,
+  updateBookSchema,
+  updateAvailabilitySchema,
+  bookIdParamSchema
+} = require("../validators/bookValidators");
 const bookController = require("../controllers/bookController");
 const router = express.Router();
 
@@ -66,6 +73,7 @@ router.post(
   "/",
   verifyJWT,
   authorize(["librarian"]),
+  validate(createBookSchema),
   bookController.createBook,
 );
 
@@ -123,18 +131,22 @@ router.get(
   "/:bookId",
   verifyJWT,
   authorize(["member", "librarian"]),
+  validateParams(bookIdParamSchema),
   bookController.getBookById,
 );
 router.put(
   "/:bookId",
   verifyJWT,
   authorize(["librarian"]),
+  validateParams(bookIdParamSchema),
+  validate(updateBookSchema),
   bookController.updateBook,
 );
 router.delete(
   "/:bookId",
   verifyJWT,
   authorize(["librarian"]),
+  validateParams(bookIdParamSchema),
   bookController.deleteBook,
 );
 
@@ -167,6 +179,8 @@ router.put(
   "/:bookId/availability",
   verifyJWT,
   authorize(["librarian"]),
+  validateParams(bookIdParamSchema),
+  validate(updateAvailabilitySchema),
   bookController.updateBookAvailability,
 );
 

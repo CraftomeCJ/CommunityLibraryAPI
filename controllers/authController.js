@@ -12,23 +12,6 @@ const {
 async function register(req, res) {
   const { username, password, role } = req.body;
 
-  if (
-    !username ||
-    !password ||
-    !role ||
-    !["member", "librarian"].includes(role)
-  ) {
-    return res.status(400).json({
-      message: "username, password, role (member|librarian) required",
-    });
-  }
-
-  if (role !== "member" && role !== "librarian") {
-    return res
-      .status(400)
-      .json({ message: "Role must be member or librarian" });
-  }
-
   try {
     const existingUser = await userModel.getUserByUsername(username);
     if (existingUser) {
@@ -50,10 +33,6 @@ async function register(req, res) {
 // Login
 async function login(req, res) {
   const { username, password } = req.body;
-
-  if (!username || !password) {
-    return res.status(400).json({ message: "username and password required" });
-  }
 
   try {
     const user = await userModel.getUserByUsername(username);
@@ -111,11 +90,6 @@ async function getUserByIdController(req, res) {
 
 async function updateUserRoleController(req, res) {
   const { role } = req.body;
-  if (!role || !["member", "librarian"].includes(role)) {
-    return res
-      .status(400)
-      .json({ message: "Role must be member or librarian" });
-  }
   try {
     const ok = await updateUserRole(Number(req.params.userId), role);
     if (!ok) return res.status(404).json({ message: "User not found" });

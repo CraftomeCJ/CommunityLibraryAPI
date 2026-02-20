@@ -38,22 +38,11 @@ async function getBookById(req, res) {
 async function createBook(req, res) {
   const { title, author, availability } = req.body;
 
-  if (!title || !author || !["Y", "N"].includes(availability)) {
-    return res
-      .status(400)
-      .json({ message: "title, author, availability (Y|N) required" });
-  }
-
-  const avail = availability ?? "Y";
-  if (avail !== "Y" && avail !== "N") {
-    return res.status(400).json({ message: "availability must be Y or N" });
-  }
-
   try {
     const bookId = await bookModel.createBook({
       title,
       author,
-      availability: avail,
+      availability,
     });
     res.status(201).json({ message: "Book created", bookId });
   } catch (error) {
@@ -66,19 +55,6 @@ async function createBook(req, res) {
 async function updateBook(req, res) {
   const { bookId } = req.params;
   const { title, author, availability } = req.body;
-
-  if (
-    title === undefined &&
-    author === undefined &&
-    availability === undefined
-  ) {
-    return res
-      .status(400)
-      .json({ message: "Provide at least one field to update" });
-  }
-  if (availability !== undefined && !["Y", "N"].includes(availability)) {
-    return res.status(400).json({ message: "availability must be Y or N" });
-  }
 
   try {
     const updated = await bookModel.updateBook(Number(bookId), {
@@ -117,10 +93,6 @@ async function deleteBook(req, res) {
 async function updateBookAvailability(req, res) {
   const { bookId } = req.params;
   const { availability } = req.body;
-
-  if (!["Y", "N"].includes(availability)) {
-    return res.status(400).json({ message: "availability must be Y or N" });
-  }
 
   try {
     const updated = await bookModel.updateBookAvailability(
