@@ -19,10 +19,15 @@ Checkpoint 2 scope: **Auth (JWT + RBAC) + Books CRUD + Loans (borrow/list/return
 
 4. **Run the Server:**
    ```bash
-   npm run dev
+   npm run dev # nodemon
    ```
 
 The server will run on port 3000.
+
+## API Documentation (Swagger)
+
+- Swagger UI: `GET /docs`
+- Raw spec (for Bruno/Postman): `GET /openapi.json`
 
 ## API Endpoints
 
@@ -76,14 +81,18 @@ The server will run on port 3000.
 - Morgan + Winston with timestamps; audit logs to `combined.log`, errors to `error.log`.
 - Global error handler returns JSON `{ error: "Something went wrong" }`.
 
-## Testing
+## How to Run Tests
 
-- Jest tests for controllers: `npm test`
+```bash
+npm test
+```
+
+(Jest + supertest with mocked models/controllers.)
 
 ## Sample Users (from create_tables.sql)
 
-- librarian1 / P@ssw0rd123
-- member1 / P@ssw0rd123
+- `librarian10` / `123`
+- `member10` / `123`
 
 ## Technologies Used
 
@@ -92,3 +101,17 @@ The server will run on port 3000.
 - MSSQL
 - bcryptjs
 - jsonwebtoken
+
+## Reflection
+Looking back on my practical journey, I started from the ground up with Practical 01, building basic Node.js apps and getting used to Express. Each practical built on the last one, adding stuff like databases in Practical 03, MVC patterns in Practical 04, and more complex stuff. By Practical 07, I had a decent base with the PolytechnicLibraryAPI, which had some user and book management.
+
+For the assignment, I took that foundation and expanded it a lot. Added proper authentication using JWT tokens, with role-based access so members and librarians have different permissions. Implemented full CRUD operations for books and loans, including borrowing books and returning them. Integrated Swagger for API documentation, which was a bit of a headache at first but now lets me see all the routes clearly. Wrote unit tests with Jest and supertest, which caught mistakes early on with lots of failing test cases. Couldn't get them to work at first, until I finally figured it out. Even built a simple HTML frontend to test the API directly without needing extra tools.
+
+The biggest challenges were definitely JWT authentication and SQL queries – I had so many errors with tokens not working and database joins messing up. Debugging those took a while, but each time I fixed something, I felt more confident. Setting up the MSSQL database and making sure everything was secure was tricky too.
+
+As a system engineer with some backend experience, I can see how this project mirrors real-world apps. From simple endpoints to a full API with auth, tests, and docs. I still got a lot to learn, like better error handling, performance optimization, or maybe adding more features, but I'm proud of how far I came. Feels good to have an end-to-end working system.
+
+## Credits
+- Practical 07 code as base to continue this assignment.
+- GenAI help (ChatGPT/Copilot) for guides on controllers, tests, Swagger, and frontend.
+- Open Library API for external book search.
