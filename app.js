@@ -2,6 +2,7 @@ require("dotenv").config();
 const express = require("express");
 const morgan = require("morgan");
 const winston = require("winston");
+const externalRoutes = require("./routes/external");
 
 const app = express();
 const logger = winston.createLogger({
@@ -29,6 +30,7 @@ const loanRoutes = require("./routes/loans");
 app.use("/auth", authRoutes);
 app.use("/books", bookRoutes);
 app.use("/loans", loanRoutes);
+app.use("/external", externalRoutes);
 
 // Basic health check
 app.get("/health", (req, res) => res.json({ status: "ok" }));
