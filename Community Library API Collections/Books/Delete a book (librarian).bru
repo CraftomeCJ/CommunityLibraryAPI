@@ -1,0 +1,78 @@
+meta {
+  name: Delete a book (librarian)
+  type: http
+  seq: 5
+  tags: [
+    Books
+  ]
+}
+
+delete {
+  url: {{baseUrl}}/books/:bookId
+  body: none
+  auth: bearer
+}
+
+params:path {
+  bookId: 
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+example {
+  name: 200 Response
+  description: Deleted
+  
+  request: {
+    url: {{baseUrl}}/books/:bookId
+    method: DELETE
+    mode: none
+    params:path: {
+      bookId: 
+    }
+  }
+  
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: text
+      content: '''
+  
+      '''
+    }
+  }
+}
+
+example {
+  name: 404 Response
+  description: Not found
+  
+  request: {
+    url: {{baseUrl}}/books/:bookId
+    method: DELETE
+    mode: none
+    params:path: {
+      bookId: 
+    }
+  }
+  
+  response: {
+    status: {
+      code: 404
+      text: Not Found
+    }
+  
+    body: {
+      type: text
+      content: '''
+  
+      '''
+    }
+  }
+}

@@ -1,0 +1,96 @@
+meta {
+  name: Update book availability (librarian)
+  type: http
+  seq: 6
+  tags: [
+    Books
+  ]
+}
+
+put {
+  url: {{baseUrl}}/books/:bookId/availability
+  body: json
+  auth: bearer
+}
+
+params:path {
+  bookId: 
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "availability": "Y"
+  }
+}
+
+example {
+  name: 200 Response
+  description: Updated
+  
+  request: {
+    url: {{baseUrl}}/books/:bookId/availability
+    method: PUT
+    mode: json
+    params:path: {
+      bookId: 
+    }
+  
+    body:json: {
+      {
+        "availability": "Y"
+      }
+    }
+  }
+  
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: text
+      content: '''
+  
+      '''
+    }
+  }
+}
+
+example {
+  name: 404 Response
+  description: Not found
+  
+  request: {
+    url: {{baseUrl}}/books/:bookId/availability
+    method: PUT
+    mode: json
+    params:path: {
+      bookId: 
+    }
+  
+    body:json: {
+      {
+        "availability": "Y"
+      }
+    }
+  }
+  
+  response: {
+    status: {
+      code: 404
+      text: Not Found
+    }
+  
+    body: {
+      type: text
+      content: '''
+  
+      '''
+    }
+  }
+}

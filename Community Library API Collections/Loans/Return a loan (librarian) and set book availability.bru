@@ -1,0 +1,78 @@
+meta {
+  name: Return a loan (librarian) and set book availability
+  type: http
+  seq: 5
+  tags: [
+    Loans
+  ]
+}
+
+put {
+  url: {{baseUrl}}/loans/:loanId/return
+  body: none
+  auth: bearer
+}
+
+params:path {
+  loanId: 
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+example {
+  name: 200 Response
+  description: Returned
+  
+  request: {
+    url: {{baseUrl}}/loans/:loanId/return
+    method: PUT
+    mode: none
+    params:path: {
+      loanId: 
+    }
+  }
+  
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: text
+      content: '''
+  
+      '''
+    }
+  }
+}
+
+example {
+  name: 404 Response
+  description: Not found
+  
+  request: {
+    url: {{baseUrl}}/loans/:loanId/return
+    method: PUT
+    mode: none
+    params:path: {
+      loanId: 
+    }
+  }
+  
+  response: {
+    status: {
+      code: 404
+      text: Not Found
+    }
+  
+    body: {
+      type: text
+      content: '''
+  
+      '''
+    }
+  }
+}

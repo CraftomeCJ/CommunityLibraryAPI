@@ -1,0 +1,78 @@
+meta {
+  name: Delete user (librarian)
+  type: http
+  seq: 6
+  tags: [
+    Auth
+  ]
+}
+
+delete {
+  url: {{baseUrl}}/auth/users/:userId
+  body: none
+  auth: bearer
+}
+
+params:path {
+  userId: 
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+example {
+  name: 200 Response
+  description: Deleted
+  
+  request: {
+    url: {{baseUrl}}/auth/users/:userId
+    method: DELETE
+    mode: none
+    params:path: {
+      userId: 
+    }
+  }
+  
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: text
+      content: '''
+  
+      '''
+    }
+  }
+}
+
+example {
+  name: 404 Response
+  description: Not found
+  
+  request: {
+    url: {{baseUrl}}/auth/users/:userId
+    method: DELETE
+    mode: none
+    params:path: {
+      userId: 
+    }
+  }
+  
+  response: {
+    status: {
+      code: 404
+      text: Not Found
+    }
+  
+    body: {
+      type: text
+      content: '''
+  
+      '''
+    }
+  }
+}

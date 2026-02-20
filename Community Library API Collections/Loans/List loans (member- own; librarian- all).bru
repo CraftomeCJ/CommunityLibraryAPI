@@ -1,0 +1,64 @@
+meta {
+  name: List loans (member: own; librarian: all)
+  type: http
+  seq: 2
+  tags: [
+    Loans
+  ]
+}
+
+get {
+  url: {{baseUrl}}/loans
+  body: none
+  auth: bearer
+}
+
+params:query {
+  ~status: ON_LOAN
+  ~status: RETURNED
+  ~page: 
+  ~limit: 
+  ~sort: loan_id
+  ~sort: loan_date
+  ~sort: due_date
+  ~sort: status
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+example {
+  name: 200 Response
+  description: OK
+  
+  request: {
+    url: {{baseUrl}}/loans
+    method: GET
+    mode: none
+    params:query: {
+      ~status: ON_LOAN
+      ~status: RETURNED
+      ~page: 
+      ~limit: 
+      ~sort: loan_id
+      ~sort: loan_date
+      ~sort: due_date
+      ~sort: status
+    }
+  }
+  
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: text
+      content: '''
+  
+      '''
+    }
+  }
+}

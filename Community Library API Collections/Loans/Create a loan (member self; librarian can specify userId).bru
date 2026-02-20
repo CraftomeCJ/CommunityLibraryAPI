@@ -1,0 +1,122 @@
+meta {
+  name: Create a loan (member self; librarian can specify userId)
+  type: http
+  seq: 1
+  tags: [
+    Loans
+  ]
+}
+
+post {
+  url: {{baseUrl}}/loans
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "bookId": 0,
+    "dueDate": "",
+    "userId": 0
+  }
+}
+
+example {
+  name: 201 Response
+  description: Created
+  
+  request: {
+    url: {{baseUrl}}/loans
+    method: POST
+    mode: json
+    body:json: {
+      {
+        "bookId": 0,
+        "dueDate": "",
+        "userId": 0
+      }
+    }
+  }
+  
+  response: {
+    status: {
+      code: 201
+      text: Created
+    }
+  
+    body: {
+      type: text
+      content: '''
+  
+      '''
+    }
+  }
+}
+
+example {
+  name: 400 Response
+  description: Validation error
+  
+  request: {
+    url: {{baseUrl}}/loans
+    method: POST
+    mode: json
+    body:json: {
+      {
+        "bookId": 0,
+        "dueDate": "",
+        "userId": 0
+      }
+    }
+  }
+  
+  response: {
+    status: {
+      code: 400
+      text: Bad Request
+    }
+  
+    body: {
+      type: text
+      content: '''
+  
+      '''
+    }
+  }
+}
+
+example {
+  name: 403 Response
+  description: Forbidden
+  
+  request: {
+    url: {{baseUrl}}/loans
+    method: POST
+    mode: json
+    body:json: {
+      {
+        "bookId": 0,
+        "dueDate": "",
+        "userId": 0
+      }
+    }
+  }
+  
+  response: {
+    status: {
+      code: 403
+      text: Forbidden
+    }
+  
+    body: {
+      type: text
+      content: '''
+  
+      '''
+    }
+  }
+}

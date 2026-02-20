@@ -1,0 +1,96 @@
+meta {
+  name: Update user role (librarian)
+  type: http
+  seq: 5
+  tags: [
+    Auth
+  ]
+}
+
+put {
+  url: {{baseUrl}}/auth/users/:userId
+  body: json
+  auth: bearer
+}
+
+params:path {
+  userId: 
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "role": "member"
+  }
+}
+
+example {
+  name: 200 Response
+  description: Updated
+  
+  request: {
+    url: {{baseUrl}}/auth/users/:userId
+    method: PUT
+    mode: json
+    params:path: {
+      userId: 
+    }
+  
+    body:json: {
+      {
+        "role": "member"
+      }
+    }
+  }
+  
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: text
+      content: '''
+  
+      '''
+    }
+  }
+}
+
+example {
+  name: 404 Response
+  description: Not found
+  
+  request: {
+    url: {{baseUrl}}/auth/users/:userId
+    method: PUT
+    mode: json
+    params:path: {
+      userId: 
+    }
+  
+    body:json: {
+      {
+        "role": "member"
+      }
+    }
+  }
+  
+  response: {
+    status: {
+      code: 404
+      text: Not Found
+    }
+  
+    body: {
+      type: text
+      content: '''
+  
+      '''
+    }
+  }
+}

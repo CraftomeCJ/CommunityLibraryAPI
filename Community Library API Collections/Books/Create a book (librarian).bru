@@ -1,0 +1,58 @@
+meta {
+  name: Create a book (librarian)
+  type: http
+  seq: 2
+  tags: [
+    Books
+  ]
+}
+
+post {
+  url: {{baseUrl}}/books
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "title": "",
+    "author": "",
+    "availability": "Y"
+  }
+}
+
+example {
+  name: 201 Response
+  description: Created
+  
+  request: {
+    url: {{baseUrl}}/books
+    method: POST
+    mode: json
+    body:json: {
+      {
+        "title": "",
+        "author": "",
+        "availability": "Y"
+      }
+    }
+  }
+  
+  response: {
+    status: {
+      code: 201
+      text: Created
+    }
+  
+    body: {
+      type: text
+      content: '''
+  
+      '''
+    }
+  }
+}

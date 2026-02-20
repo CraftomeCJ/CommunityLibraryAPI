@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "Community Library API From Swagger Export",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}
