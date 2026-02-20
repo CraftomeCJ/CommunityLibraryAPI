@@ -31,6 +31,39 @@
       .col {
         flex: 1 1 320px;
       }
+      :root {
+        --card-bg: #fff;
+        --card-border: #e0e0e0;
+        --pad: 12px;
+        --gap: 12px;
+      }
+      body {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 16px;
+        background: #f7f7fb;
+      }
+      fieldset {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 8px;
+        padding: var(--pad);
+        margin-bottom: var(--gap);
+      }
+      button {
+        cursor: pointer;
+      }
+      .card-grid {
+        display: grid;
+        gap: 12px;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      }
+      .card {
+        border: 1px solid var(--card-border);
+        border-radius: 6px;
+        padding: 10px;
+        background: #fff;
+      }
     </style>
   </head>
   <body>
@@ -297,22 +330,20 @@
         );
 
         const wrap = document.getElementById("externalCards");
+        wrap.className = "card-grid";
         wrap.innerHTML = "";
-        (Array.isArray(data) ? data : []).forEach((b) => {
+        (data || []).forEach((b) => {
           const cover = b.cover_i
             ? `https://covers.openlibrary.org/b/id/${b.cover_i}-M.jpg`
             : "";
           const div = document.createElement("div");
-          div.style.border = "1px solid #ddd";
-          div.style.padding = "0.5rem";
-          div.style.margin = "0.25rem";
-          div.style.width = "200px";
+          div.className = "card";
           div.innerHTML = `
-            ${cover ? `<img src="${cover}" alt="cover" style="width:100%;height:240px;object-fit:cover;">` : ""}
-            <div><strong>${b.title || "No title"}</strong></div>
-            <div>${(b.author_name || []).join(", ") || "Unknown author"}</div>
-            <div>${b.first_publish_year || ""}</div>
-          `;
+    ${cover ? `<img src="${cover}" alt="cover" style="width:100%;height:200px;object-fit:cover;border-radius:4px;">` : ""}
+    <div><strong>${b.title || "Untitled"}</strong></div>
+    <div>${(b.author_name || []).join(", ") || "Unknown author"}</div>
+    <div>${b.first_publish_year || ""}</div>
+  `;
           wrap.appendChild(div);
         });
       }
